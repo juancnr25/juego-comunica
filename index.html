@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NeuroArena</title>
+<meta name="description" content="Juego para practicar cómo aprende el cerebro y cómo comunicar: simulador de charla, concurso, aventura y cartas.">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NeuroArena">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{--bg:#0a0a0b;--bg2:#101013;--panel:#141418;--panel2:#1b1b21;--line:#26262d;--tx:#e8e8ec;--mu:#9a9aa5;--am:#f59e0b;--amd:#b45309;--cy:#06b6d4;--cyd:#0e7490;--ok:#22c55e;--bad:#ef4444;--r:14px;
+--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);
+--serif:Georgia,"Iowan Old Style","Palatino Linotype",serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}html.big{font-size:18.5px}
+body{margin:0;background:var(--bg);color:var(--tx);font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;overscroll-behavior-y:none}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--cy)}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(10px + var(--sat)) calc(14px + var(--sar)) 10px calc(14px + var(--sal));background:rgba(10,10,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.top .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--am),var(--cy));display:grid;place-items:center;font-size:17px}
+header.top h1{font-size:1.02rem;margin:0;flex:1;letter-spacing:.3px}
+header.top h1 b{color:var(--am)}
+.ib{background:var(--panel2);border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
+main{padding:16px calc(14px + var(--sar)) calc(96px + var(--sab)) calc(14px + var(--sal));max-width:760px;margin:0 auto}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;background:rgba(16,16,19,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px calc(4px + var(--sar)) calc(6px + var(--sab)) calc(4px + var(--sal))}
+nav.tabs button{flex:1;background:none;border:0;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;color:var(--mu);border-radius:10px}
+nav.tabs button span{font-size:1.3rem;line-height:1}
+nav.tabs button.on{color:var(--am);background:rgba(245,158,11,.08)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card h2,.card h3{margin:0 0 8px}
+h2{font-size:1.3rem}h3{font-size:1.08rem}
+.muted{color:var(--mu)}.small{font-size:.86rem}.mono{font-family:var(--mono)}
+.am{color:var(--am)}.cy{color:var(--cy)}.okc{color:var(--ok)}.badc{color:var(--bad)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:11px 16px;font-weight:600;min-height:46px}
+.btn.pri{background:var(--am);color:#111;border-color:var(--am)}
+.btn.sec{background:transparent;border-color:var(--cy);color:var(--cy)}
+.btn.full{width:100%}
+.btn:disabled{opacity:.4}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>.grow{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-family:var(--mono);font-size:1.45rem;color:var(--am)}
+.stat span{font-size:.8rem;color:var(--mu)}
+.bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--am),var(--cy));border-radius:99px;transition:width .5s}
+.mod{display:flex;gap:12px;align-items:center;padding:14px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);margin-bottom:10px;width:100%;text-align:left}
+.mod .ic{font-size:1.8rem;width:50px;height:50px;border-radius:12px;background:var(--panel2);display:grid;place-items:center;flex:none}
+.mod .t{font-weight:700}.mod .s{font-size:.84rem;color:var(--mu)}
+.tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mu);font-family:var(--mono)}
+.tag.ok{border-color:var(--ok);color:var(--ok)}.tag.am{border-color:var(--am);color:var(--am)}
+/* lección */
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 14px}
+.dots i{width:22px;height:5px;border-radius:9px;background:var(--line)}
+.dots i.r{background:var(--cyd)}.dots i.c{background:var(--am)}
+.lesson h2{font-size:1.4rem;line-height:1.25;margin:4px 0 12px}
+.lesson p,.lesson li{font-size:1.02rem}
+.lesson ul,.lesson ol{padding-left:22px}
+.lesson li{margin-bottom:6px}
+.relato{font-family:var(--serif);font-size:1.12rem;line-height:1.75}
+.relato p{margin:0 0 14px}
+.relato .dlg{font-style:italic;color:#f3e2c0;padding-left:14px;border-left:2px solid var(--amd)}
+.drop::first-letter{float:left;font-size:3.6em;line-height:.85;padding:6px 8px 0 0;color:var(--am);font-weight:700}
+.chap{font-family:var(--mono);font-size:.78rem;letter-spacing:2px;color:var(--cy);text-transform:uppercase}
+.callout{border-radius:12px;padding:12px 14px;margin:14px 0;border:1px solid}
+.callout.amber{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.35)}
+.callout.cyan{background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.35)}
+.callout ul{margin:6px 0 0}
+.dato{background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(6,182,212,.06));border:1px dashed rgba(168,85,247,.5);border-radius:12px;padding:12px 14px;margin:16px 0}
+.dato h5,.tip h5{margin:0 0 4px;font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase}
+.dato h5{color:#c084fc}.tip h5{color:var(--ok)}
+.tip{background:rgba(34,197,94,.07);border-left:3px solid var(--ok);border-radius:0 12px 12px 0;padding:10px 14px;margin:16px 0}
+.gancho{font-family:var(--serif);font-style:italic;color:var(--am);font-size:1.05rem;margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.gancho::before{content:"➜ ";font-style:normal}
+.myth{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:10px 12px;font-style:italic}
+.bigq{font-family:var(--serif);font-size:1.35rem;text-align:center;padding:16px;border:1px solid var(--am);border-radius:12px;margin:12px 0;color:var(--am)}
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.pillars div{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.pillars b{color:var(--am);display:block}.pillars span{font-size:.88rem;color:var(--mu)}
+ol.steps li::marker{color:var(--am);font-weight:700}
+.tech{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.tech h4{margin:0 0 6px;color:var(--cy)}
+.tech .ej{font-family:var(--serif);font-style:italic;color:#f3e2c0;margin:6px 0 0}
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem;margin:10px 0}
+.tbl th,.tbl td{border:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}
+.tbl th{background:var(--panel2);color:var(--am)}
+.checklist h4{color:var(--cy);margin:12px 0 6px}
+.checklist label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}
+.checklist input{width:20px;height:20px;accent-color:var(--am);flex:none;margin-top:3px}
+.check{background:var(--bg2);border:1px solid var(--cyd);border-radius:12px;padding:12px 14px;margin-top:18px}
+.check .q{font-weight:600}.check .ans{margin-top:8px;color:var(--cy);display:none}.check.open .ans{display:block}
+.navrow{display:flex;gap:10px;margin-top:18px}.navrow .btn{flex:1}
+.speak{font-size:.85rem;padding:6px 10px;min-height:34px}
+/* widgets */
+.w{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0}
+.w svg{width:100%;height:auto;display:block}
+.zone{cursor:pointer;transition:opacity .2s;opacity:.55}.zone:hover,.zone.on{opacity:.95}
+.winfo{min-height:72px;padding:10px;border-radius:10px;background:var(--panel2);margin-top:8px;font-size:.93rem}
+.winfo b{display:block;margin-bottom:2px}
+.flow{display:flex;flex-direction:column;gap:6px}
+.flow button{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:left}
+.flow button.on{border-color:var(--am);background:rgba(245,158,11,.08)}
+.flow .ar{text-align:center;color:var(--mu);line-height:1;font-size:.8rem}
+.flow .fi{font-size:1.4rem}
+.seg{display:flex;gap:6px;margin-top:8px}.seg button{flex:1;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:.85rem}
+.seg button.on{border-color:var(--cy);color:var(--cy)}
+.tl{display:flex;flex-direction:column;gap:6px}
+.tl .m{display:grid;grid-template-columns:62px 1fr;gap:10px;background:var(--panel2);border-radius:10px;padding:10px;border-left:4px solid var(--am)}
+.tl .m:nth-child(even){border-left-color:var(--cy)}
+.tl .m b{font-family:var(--mono);color:var(--am)}
+/* quiz */
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qp{font-size:1.12rem;font-weight:600;margin:8px 0 14px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:13px 14px;margin-bottom:9px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-size:1rem}
+.opt.ok{border-color:var(--ok);background:rgba(34,197,94,.12)}
+.opt.bad{border-color:var(--bad);background:rgba(239,68,68,.12)}
+.opt.sel{border-color:var(--cy)}
+.opt:disabled{opacity:1}
+.ordlist .opt{display:flex;gap:10px;align-items:center}
+.ordlist .n{font-family:var(--mono);color:var(--am);min-width:22px}
+.fb{border-radius:12px;padding:12px;margin:10px 0;font-size:.95rem}
+.fb.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.4)}
+.fb.bad{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4)}
+.big-score{font-family:var(--mono);font-size:3rem;font-weight:800;text-align:center;color:var(--am);line-height:1.1}
+/* flashcards */
+.flash{perspective:1000px;height:260px;margin:12px 0}
+.flash .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flash.flip .in{transform:rotateY(180deg)}
+.flash .fc{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line)}
+.flash .front{background:linear-gradient(160deg,var(--panel2),var(--panel));font-size:1.2rem;font-weight:700}
+.flash .back{background:linear-gradient(160deg,#0b2a30,var(--panel));transform:rotateY(180deg);font-size:1.02rem}
+.flash small{position:absolute;top:10px;left:14px;font-size:.72rem;color:var(--mu);font-family:var(--mono)}
+.boxes{display:flex;gap:6px}.boxes div{flex:1;text-align:center;background:var(--panel2);border-radius:10px;padding:8px 2px;border:1px solid var(--line)}
+.boxes b{display:block;font-family:var(--mono);color:var(--cy);font-size:1.1rem}.boxes span{font-size:.7rem;color:var(--mu)}
+/* forms */
+label.f{display:block;font-size:.85rem;color:var(--mu);margin:10px 0 4px}
+input.t,textarea.t,select.t{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--tx);font:inherit}
+textarea.t{min-height:70px;resize:vertical}
+.rub{border-bottom:1px solid var(--line);padding:10px 0}
+.rub .lv{display:flex;gap:6px;margin-top:6px}
+.rub .lv button{flex:1;padding:8px 0;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-family:var(--mono)}
+.rub .lv button.on{background:var(--am);color:#111;border-color:var(--am)}
+.sw{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.tg{width:50px;height:28px;border-radius:99px;background:var(--line);position:relative;border:0;flex:none}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{background:var(--am)}.tg.on::after{left:25px}
+.toast{position:fixed;left:50%;bottom:calc(90px + var(--sab));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--am);padding:10px 16px;border-radius:12px;z-index:50;font-size:.92rem;max-width:90vw;animation:tin .25s}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+.ring{width:110px;height:110px;flex:none}
+.hero{display:flex;gap:16px;align-items:center}
+.chart{width:100%;height:auto}
+.fade{animation:fd .3s}@keyframes fd{from{opacity:0;transform:translateY(6px)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;display:grid;place-items:center;padding:calc(20px + var(--sat)) 16px calc(20px + var(--sab))}
+.modal .card{max-width:520px;width:100%;max-height:85vh;overflow:auto}
+pre.guion{white-space:pre-wrap;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:var(--mono);font-size:.85rem}
+/* ===== Juego ===== */
+.lvl{display:flex;align-items:center;gap:12px}
+.lvl .badge{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,var(--am),var(--cy));display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:1.3rem;color:#111;flex:none}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mode{border-radius:16px;padding:14px;border:1px solid var(--line);text-align:left;min-height:150px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.mode .mi{font-size:2rem}.mode b{font-size:1.02rem}.mode span{font-size:.78rem;color:#d4d4d8}
+.mode .best{margin-top:auto;font-family:var(--mono);font-size:.75rem;color:#fff;opacity:.85}
+.m1{background:linear-gradient(150deg,#3b1d06,#141418)}.m2{background:linear-gradient(150deg,#06303a,#141418)}.m3{background:linear-gradient(150deg,#2a1240,#141418)}.m4{background:linear-gradient(150deg,#0b3320,#141418)}
+.logros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.logro{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center;font-size:.66rem;color:var(--mu)}
+.logro i{display:block;font-style:normal;font-size:1.6rem;filter:grayscale(1);opacity:.35}
+.logro.on{border-color:var(--am);color:var(--tx)}.logro.on i{filter:none;opacity:1}
+.meters{display:grid;gap:6px;margin-bottom:10px}
+.meter{display:grid;grid-template-columns:96px 1fr 34px;gap:8px;align-items:center;font-size:.8rem}
+.meter .bar i{transition:width .6s}
+.meter b{font-family:var(--mono);text-align:right}
+.aud{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;font-size:1.55rem;text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 4px;margin-bottom:12px}
+.aud span{transition:transform .3s}.aud span.pop{transform:scale(1.25)}
+.sit{font-family:var(--serif);font-size:1.12rem;line-height:1.55;margin:4px 0 12px}
+.delta{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.delta span{font-family:var(--mono);font-size:.8rem;padding:3px 8px;border-radius:8px;background:var(--panel2)}
+.up{color:var(--ok)}.dn{color:var(--bad)}
+.stars{font-size:2.4rem;text-align:center;letter-spacing:6px}
+.timer{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.timer i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--am),var(--ok));transition:width .25s linear}
+.lifelines{display:flex;gap:8px;margin:10px 0}.lifelines button{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--cy);background:transparent;color:var(--cy);font-size:.82rem}
+.lifelines button:disabled{opacity:.3;border-color:var(--line);color:var(--mu)}
+.hearts{font-size:1.15rem;letter-spacing:2px}
+.map{position:relative;padding:6px 0}
+.znode{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin:0 0 4px}
+.znode .zi{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;background:var(--panel2);border:2px solid var(--line);flex:none}
+.znode.done .zi{border-color:var(--ok);background:rgba(34,197,94,.12)}
+.znode.open .zi{border-color:var(--am);box-shadow:0 0 18px rgba(245,158,11,.45);animation:pulse 1.6s infinite}
+.znode.lock{opacity:.45}
+.znode.jefe{border-color:#a855f7}
+.zline{width:3px;height:16px;background:var(--line);margin:0 0 4px 38px}
+.zline.on{background:var(--ok)}
+@keyframes pulse{50%{box-shadow:0 0 4px rgba(245,158,11,.2)}}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match .col{display:flex;flex-direction:column;gap:8px}
+.match button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:.88rem;min-height:52px}
+.match button.sel{border-color:var(--cy);background:rgba(6,182,212,.12)}
+.match button.ok{border-color:var(--ok);background:rgba(34,197,94,.12);opacity:.65}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.situ{border-radius:16px;padding:16px;background:linear-gradient(150deg,#2b1a05,#141418);border:1px solid var(--amd);margin-bottom:12px}
+.situ b{font-size:1.1rem;display:block;color:var(--am)}
+.hand{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tcard{border-radius:12px;border:1px solid var(--line);background:linear-gradient(170deg,#1f2a33,#141418);padding:8px 4px;text-align:center;min-height:120px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s}
+.tcard i{font-style:normal;font-size:1.7rem}.tcard b{font-size:.68rem;line-height:1.2}
+.tcard.sel{border-color:var(--am);transform:translateY(-8px);box-shadow:0 6px 18px rgba(245,158,11,.3)}
+.tcard.g{border-color:var(--ok)}.tcard.x{border-color:var(--bad)}
+.tdesc{min-height:44px;font-size:.86rem;color:var(--mu);margin:10px 0;text-align:center}
+.combo{font-family:var(--mono);color:#c084fc;font-weight:800;font-size:1.1rem;text-align:center;animation:fd .4s}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:70}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo" onclick="go('inicio')">🎮</div><h1 onclick="go('inicio')">Neuro<b>Arena</b></h1><button class="ib" onclick="go('ajustes')" aria-label="Ajustes">⚙️</button></header>
+<main id="view"></main>
+<script>/* NeuroArena: datos del juego. Personajes ficticios (mismo universo que NeuroComunica). */
+
+/* ===== MODO 1: SIMULADOR "EN ESCENA" =====
+   a = atención, c = comprensión, r = retención (efectos sobre medidores 0-100) */
+const ESCENARIOS=[
+{id:'muelle',icono:'⚓',titulo:'Charla de 5 minutos en el muelle',ctx:'6:30 a.m. · 15 riggers y operadores · ruido de motores',obj:'Que nadie se pare debajo de una carga suspendida.',
+pasos:[
+{s:'Llegas al punto de reunión. Quince pares de ojos te miran sin muchas ganas. ¿Cómo empiezas?',o:[
+{t:'«Buenos días. Primero firmen la lista y luego les hablo de izaje.»',a:-15,c:0,r:-5,f:'Gastaste la primacía en un trámite. La firma va al final.'},
+{t:'Levantas un grillete deformado a la altura de los ojos y esperas en silencio cinco segundos.',a:20,c:5,r:10,f:'Objeto real + silencio = hueco de curiosidad. Todas las miradas en ti.'},
+{t:'«Hoy vamos a revisar el procedimiento de izaje completo. Son diecinueve láminas.»',a:-20,c:-5,r:-5,f:'Anunciaste aburrimiento. Los cerebros activaron el piloto automático.'}]},
+{s:'Tienes su atención. Es el momento del mensaje central.',o:[
+{t:'«Hay que tener cuidado con las cargas y trabajar seguro.»',a:0,c:-10,r:-10,f:'Abstracto. Nadie sabe qué conducta concreta esperas.'},
+{t:'«Nadie se para debajo de una carga suspendida.»',a:5,c:15,r:15,f:'Una conducta observable en menos de 15 palabras.'},
+{t:'Lees las once normas de izaje, una por una.',a:-15,c:-10,r:-15,f:'La memoria de trabajo sostiene unas 4 cosas. Las primeras ya se cayeron.'}]},
+{s:'Necesitas una prueba que haga real el mensaje.',o:[
+{t:'Le pides a Teodoro que cuente el día de 2009 en que el grillete le pasó a un metro de la cabeza.',a:15,c:10,r:15,f:'Historia real y cercana: memoria episódica y cerebros sincronizados.'},
+{t:'Muestras fotos de un accidente grave sacadas de internet, sin comentar nada.',a:10,c:-10,r:-5,f:'Miedo sin acción clara genera negación: «a mí no me va a pasar».'},
+{t:'Citas: «según estudios, recordamos el 90% de lo que hacemos».',a:-5,c:-5,r:-5,f:'La pirámide del aprendizaje es inventada. Pierdes credibilidad con quien lo sepa.'}]},
+{s:'Toca verificar que el mensaje llegó.',o:[
+{t:'«¿Alguna pregunta?… ¿No? Perfecto.»',a:-5,c:-5,r:0,f:'El silencio no prueba comprensión.'},
+{t:'«Wilder, muéstrame dónde te pararías cuando la grúa gire.» Y esperas.',a:10,c:15,r:15,f:'Demostración inversa: ves la conducta, corriges en el momento.'},
+{t:'«¿Se entendió?» Todos dicen que sí.',a:0,c:-5,r:0,f:'Pregunta cerrada: obtienes un «sí» automático, no información.'}]},
+{s:'Último minuto. El cierre es lo que más van a recordar.',o:[
+{t:'«Bueno, cuídense. Ya saben.»',a:-5,c:-5,r:-10,f:'Desperdiciaste la recencia y el «final» del pico-final.'},
+{t:'«¿Qué harás distinto hoy?» Dos responden. Repiten la frase en coro. «Mañana les cuento qué encontramos en la eslinga.»',a:10,c:10,r:20,f:'Compromiso, repetición, producción en voz alta y gancho a la próxima charla.'},
+{t:'Repites las once normas por si acaso.',a:-15,c:-5,r:-5,f:'Saturación al final: el mensaje central queda enterrado.'}]}]},
+{id:'induccion',icono:'🆕',titulo:'Inducción del primer día',ctx:'Sala de inducción · 4 trabajadores nuevos · 1 hora',obj:'Que sepan qué hacer en una emergencia y cómo detener un trabajo inseguro.',
+pasos:[
+{s:'Los cuatro nuevos llegan nerviosos, con el EPP recién estrenado. ¿Cómo arrancas?',o:[
+{t:'Veinte minutos de historia de la empresa, misión, visión y organigrama.',a:-15,c:-5,r:-5,f:'Lo menos útil ocupa el momento de mayor atención.'},
+{t:'«Si mañana suena la sirena, ¿hacia dónde corren?» Nadie sabe. Abriste el hueco.',a:15,c:5,r:10,f:'Pregunta real y vital: curiosidad y relevancia inmediata.'},
+{t:'Les entregas el reglamento de 80 páginas para que lo lean en silencio.',a:-20,c:-10,r:-10,f:'Lectura pasiva, sin prioridad ni interacción.'}]},
+{s:'¿Cuánto contenido das el primer día?',o:[
+{t:'Los cuarenta temas del programa de inducción, rápido, para cumplir.',a:-10,c:-15,r:-15,f:'Cerebro saturado: retendrán pocos temas y al azar.'},
+{t:'Cuatro temas vitales: riesgos críticos, emergencia, a quién preguntar y cómo detener un trabajo. El resto, en la semana.',a:5,c:15,r:15,f:'Lo vital primero, lo demás espaciado.'},
+{t:'Lo que diga el procedimiento, en el orden del procedimiento.',a:-5,c:-5,r:-5,f:'El orden del documento no es el orden del cerebro.'}]},
+{s:'¿Dónde enseñas el punto de reunión y los extintores?',o:[
+{t:'En la sala, con fotos en el proyector.',a:0,c:0,r:-5,f:'Funciona, pero pierdes las llaves del contexto.'},
+{t:'Recorrido por el muelle: se paran en el punto de reunión y tocan el extintor.',a:10,c:10,r:15,f:'Memoria dependiente del contexto: aprenden donde lo usarán.'},
+{t:'Les pones un video de treinta minutos.',a:-10,c:-5,r:-5,f:'Pasivo y largo para un cerebro ya cansado.'}]},
+{s:'Explicas el permiso de trabajo diario.',o:[
+{t:'«Antes de su ATS revisen el IPERC y, si aplica, el PETAR.»',a:-5,c:-15,r:-5,f:'Maldición del conocimiento: cuatro siglas en una frase.'},
+{t:'«Antes de empezar llenan una hoja llamada ATS: una lista de qué puede salir mal y cómo evitarlo.»',a:5,c:15,r:5,f:'Defines la sigla la primera vez y con palabras simples.'},
+{t:'«Cualquier duda, pregunten a cualquiera.»',a:0,c:-5,r:0,f:'Sin un referente claro, la duda se queda callada.'}]},
+{s:'¿Cómo cierras el primer día?',o:[
+{t:'Examen escrito de treinta preguntas en ese momento.',a:-5,c:0,r:0,f:'Evaluar el mismo día mide lo que entró, no lo que se quedó.'},
+{t:'Les asignas un acompañante y anuncias que mañana y en tres días les preguntarás lo vital.',a:5,c:5,r:20,f:'Acompañamiento + repaso espaciado programado.'},
+{t:'Firman la lista y a trabajar.',a:0,c:-5,r:-10,f:'La firma prueba asistencia, no aprendizaje.'}]}]},
+{id:'arnes',icono:'🪢',titulo:'Capacitación práctica: arnés',ctx:'Taller · 8 trabajadores · 45 minutos',obj:'Que se coloquen y revisen el arnés correctamente.',
+pasos:[
+{s:'Empiezas la capacitación práctica.',o:[
+{t:'Explicas la norma técnica del arnés en veinticinco láminas.',a:-15,c:-5,r:-10,f:'Una habilidad no se aprende con láminas.'},
+{t:'Preguntas quién ha usado arnés y qué le incomodó. Partes de su experiencia.',a:10,c:5,r:5,f:'Paso 1 del método TWI: preparar y anclar a lo que ya saben.'},
+{t:'Repartes los arneses y que cada uno se lo ponga como sepa.',a:5,c:-10,r:-5,f:'Sin modelo previo, cada uno repite sus errores.'}]},
+{s:'Presentas la operación.',o:[
+{t:'Te lo pones tú lentamente, paso a paso, diciendo el porqué de cada punto clave.',a:10,c:15,r:10,f:'Paso 2 de TWI: mostrar con puntos clave y razones.'},
+{t:'Pones un video de internet en inglés.',a:0,c:-10,r:-5,f:'Idioma ajeno: sin comprensión no hay acople.'},
+{t:'Lo describes con palabras, sin mostrarlo.',a:-5,c:-10,r:-10,f:'La memoria procedimental necesita ver y hacer.'}]},
+{s:'Hora de practicar.',o:[
+{t:'Cada uno se lo pone diciendo en voz alta los puntos clave. Corriges en el momento.',a:10,c:15,r:20,f:'Práctica + producción en voz alta + retroalimentación inmediata.'},
+{t:'Uno pasa al frente y los demás miran.',a:-5,c:0,r:-5,f:'Siete personas sin practicar.'},
+{t:'No hay tiempo: pasas al tema siguiente.',a:-5,c:-10,r:-15,f:'Sin práctica, no hay habilidad.'}]},
+{s:'Un veterano, muy seguro, deja suelta la correa de las piernas.',o:[
+{t:'Lo corriges con burla frente a todos.',a:-5,c:-5,r:0,f:'Aprendió a esconder sus errores, no a corregirlos.'},
+{t:'«¿Qué pasaría si caes así?» Lo piensa, se sorprende, le explicas con calma.',a:5,c:10,r:15,f:'Efecto de hipercorrección: error seguro + corrección = recuerdo fuerte.'},
+{t:'Lo dejas pasar para no incomodarlo.',a:0,c:-15,r:-10,f:'El error no corregido se va al frente de trabajo.'}]},
+{s:'Terminó la sesión.',o:[
+{t:'Firman la lista y listo.',a:0,c:0,r:-10,f:'Ninguna evidencia de aplicación.'},
+{t:'Programas observarlos en campo la próxima semana.',a:5,c:5,r:15,f:'Paso 4 de TWI y nivel 3 de Kirkpatrick.'},
+{t:'Mandas el procedimiento por WhatsApp.',a:0,c:0,r:0,f:'Información disponible no es información aprendida.'}]}]},
+{id:'leccion',icono:'📣',titulo:'Lección aprendida: la tubería que giró',ctx:'Comedor · 20 trabajadores · 10 minutos',obj:'Que siempre haya alguien controlando la soga guía y nadie se acerque a la carga.',
+pasos:[
+{s:'¿Cómo empiezas a contar el incidente?',o:[
+{t:'«Wilder casi provoca un accidente por descuidado.»',a:5,c:-10,r:-5,f:'Culpar en público activa defensas en todos.'},
+{t:'En presente, desde los ojos del rigger: «Son las diez y doce. La tubería sube. El viento empieza a girarla…»',a:15,c:10,r:10,f:'Narrativa concreta con detalle exacto: el público se mete en la escena.'},
+{t:'Lees el informe de investigación completo.',a:-15,c:-5,r:-5,f:'Formato pensado para archivar, no para recordar.'}]},
+{s:'La tubería está girando. Detienes el relato.',o:[
+{t:'«¿Qué habrían hecho ustedes en ese momento?» Y esperas.',a:10,c:10,r:10,f:'Contrarresta el sesgo retrospectivo y activa el compromiso.'},
+{t:'«Era obvio que iba a pasar.»',a:0,c:-5,r:-5,f:'Sesgo retrospectivo: para quien estaba ahí, no era obvio.'},
+{t:'Muestras quince fotos del área.',a:0,c:-5,r:0,f:'Carga extraña sin un foco claro.'}]},
+{s:'¿Qué explicas después?',o:[
+{t:'Qué barrera falló (nadie controlaba la soga guía) y qué cambia: un vigía asignado a la soga en cada maniobra.',a:5,c:15,r:10,f:'Causa + cambio concreto.'},
+{t:'Anuncias sanciones para el próximo que lo haga.',a:5,c:-5,r:-5,f:'Amenaza sin eficacia: la gente oculta en vez de reportar.'},
+{t:'«Tengan más cuidado.»',a:-5,c:-10,r:-5,f:'Vago. No hay conducta que observar.'}]},
+{s:'El ambiente está tenso.',o:[
+{t:'Confiesas: «Yo también he jalado una soga con una mano y el celular en la otra.»',a:10,c:5,r:5,f:'Confesión con humor: bajan las defensas y sube la confianza.'},
+{t:'Haces bromas sobre Wilder.',a:5,c:-10,r:-5,f:'La burla destruye la seguridad psicológica.'},
+{t:'Mantienes la seriedad total, sin respiro.',a:-5,c:0,r:0,f:'Sin pausa emocional, la atención decae.'}]},
+{s:'Cierre.',o:[
+{t:'Cada vigía dice en voz alta qué hará en la próxima maniobra. Repites la regla.',a:5,c:10,r:15,f:'Compromiso público y producción.'},
+{t:'Envías el informe por correo.',a:0,c:0,r:-5,f:'Sin cierre, no hay recencia.'},
+{t:'«Eso es todo.»',a:-5,c:-5,r:-10,f:'Final plano, recuerdo plano.'}]}]}
+];
+const EVENTOS=[
+{s:'⚠️ Pasa una chata con el motor a fondo. No se escucha nada.',o:[
+{t:'Sigues hablando más fuerte.',a:-5,c:-10,r:-5,f:'El ruido se comió tus palabras.'},
+{t:'Haces una pausa, esperas que pase y retomas repitiendo la idea clave.',a:5,c:5,r:5,f:'Pausa estratégica y repetición.'},
+{t:'Gritas para imponerte.',a:-5,c:-5,r:0,f:'Más tensión, igual de poca comprensión.'}]},
+{s:'⚠️ Jhon está mirando el celular.',o:[
+{t:'Lo regañas delante de todos.',a:-5,c:-5,r:0,f:'Recuperas a uno, tensas a todos.'},
+{t:'«Jhon, imagina que tú estás en la rampa…» y sigues.',a:10,c:5,r:0,f:'Efecto cóctel: el nombre atraviesa la distracción.'},
+{t:'Lo ignoras.',a:-5,c:0,r:0,f:'La distracción se contagia.'}]},
+{s:'⚠️ «Inge, eso es pura teoría. Tengo veinte años haciéndolo así.»',o:[
+{t:'«Yo soy la supervisora y se hace como digo.»',a:-5,c:-5,r:-5,f:'Ganas la discusión y pierdes al grupo.'},
+{t:'«¿Cómo lo haces tú? Cuéntanos.» Conectas su experiencia con el mensaje.',a:10,c:10,r:5,f:'Anclas lo nuevo a lo que ya sabe el veterano.'},
+{t:'Haces como que no escuchaste.',a:-5,c:-5,r:0,f:'La objeción queda flotando.'}]},
+{s:'⚠️ Te quedas en blanco.',o:[
+{t:'Pides disculpas largamente.',a:-10,c:0,r:0,f:'Amplificas lo que nadie había notado.'},
+{t:'Miras tu papelito con el mensaje central, exhalas lento y lo repites.',a:5,c:5,r:5,f:'Ilusión de transparencia: se notó menos de lo que crees.'},
+{t:'Improvisas otro tema.',a:0,c:-10,r:-5,f:'Perdiste el hilo y el mensaje.'}]},
+{s:'⚠️ Lluvia fuerte sobre el techo de calamina.',o:[
+{t:'Gritas por encima del ruido.',a:-5,c:-5,r:0,f:'Esfuerzo alto, comprensión baja.'},
+{t:'Juntas al grupo más cerca y te apoyas en el objeto y los gestos.',a:5,c:5,r:5,f:'Canal visual cuando el auditivo falla.'},
+{t:'Suspendes y no retomas.',a:0,c:-5,r:-10,f:'El mensaje se quedó a medias.'}]},
+{s:'⚠️ Llega el gerente y se para atrás.',o:[
+{t:'Cambias a lenguaje formal con siglas para impresionar.',a:-5,c:-10,r:0,f:'Hablas para el gerente, no para tu público.'},
+{t:'Sigues igual, enfocado en ellos.',a:5,c:5,r:0,f:'Tu público sigue siendo el mismo.'},
+{t:'Le cedes la palabra y pierdes el hilo.',a:-5,c:-5,r:-5,f:'Se diluye el mensaje central.'}]}
+];
+
+/* ===== MODO 2: TRIVIA "CONCURSO" ===== */
+const TRIVIA=[
+{p:'¿Cuántas neuronas tiene aproximadamente el cerebro humano?',o:['86 millones','86 mil millones','8 billones','860'],c:1,h:'Es un número con "mil millones".',e:'Unos 86 mil millones (Azevedo y colegas, 2009).'},
+{p:'¿Qué estructura actúa como "archivador" de recuerdos nuevos?',o:['Cerebelo','Amígdala','Hipocampo','Tálamo'],c:2,h:'Su nombre significa "caballito de mar".',e:'El hipocampo registra y ayuda a consolidar.'},
+{p:'¿Qué estructura contiene alrededor del 80% de las neuronas del cerebro?',o:['Corteza prefrontal','Cerebelo','Hipocampo','Tronco encefálico'],c:1,h:'Está atrás y abajo, y coordina movimientos.',e:'El cerebelo: 10% del volumen, 80% de las neuronas.'},
+{p:'¿Cuántas unidades sostiene aproximadamente la memoria de trabajo?',o:['1','4','12','Ilimitadas'],c:1,h:'Menos de los dedos de una mano.',e:'Alrededor de 4 (Cowan).'},
+{p:'¿Qué le pasó a Phineas Gage en 1848?',o:['Perdió la memoria','Una barra de hierro le atravesó la corteza prefrontal','Se volvió bilingüe','Perdió la vista'],c:1,h:'Trabajaba en ferrocarriles.',e:'Cambió su capacidad de planificar y controlar impulsos.'},
+{p:'¿Qué tenían más grande los taxistas de Londres según Maguire (2000)?',o:['La amígdala','La parte posterior del hipocampo','El cerebelo','La corteza visual'],c:1,h:'Memoria espacial.',e:'Y crecía con los años de oficio.'},
+{p:'¿Cómo llamaba Ramón y Cajal a las neuronas?',o:['Las estrellas del cielo','Las mariposas del alma','Los hilos de la mente','Las semillas del saber'],c:1,h:'Un insecto de colores.',e:'"Las mariposas del alma".'},
+{p:'¿Cuánta energía consume el cerebro respecto al total del cuerpo?',o:['2%','5%','Cerca del 20%','50%'],c:2,h:'Pesa 2% pero gasta mucho más.',e:'Cerca del 20% con unos 20 vatios.'},
+{p:'A Henry Molaison le extirparon ambos hipocampos. ¿Qué podía seguir aprendiendo?',o:['Nombres de personas','Hechos nuevos','Habilidades motoras como dibujar en espejo','Nada'],c:2,h:'Memoria procedimental.',e:'Mejoraba sin recordar haberlo practicado.'},
+{p:'¿Qué encontró Ebbinghaus sobre el olvido?',o:['Se olvida al mismo ritmo siempre','La mayor pérdida ocurre en las primeras horas y días','Nunca olvidamos','Solo olvidan los mayores'],c:1,h:'La curva cae fuerte al inicio.',e:'Por eso el primer repaso debe ser pronto.'},
+{p:'¿Qué hacen las ratas mientras duermen después de recorrer un laberinto?',o:['Nada','Reproducen las secuencias neuronales del recorrido','Olvidan el laberinto','Sueñan con queso'],c:1,h:'Wilson y McNaughton, 1994.',e:'El hipocampo repasa lo vivido durante el sueño.'},
+{p:'En el estudio de Loftus, ¿qué cambió las estimaciones de velocidad?',o:['El color de los autos','Un solo verbo en la pregunta','La hora del día','El idioma'],c:1,h:'"Estrellaron" o "tocaron".',e:'La memoria es reconstructiva y sugestionable.'},
+{p:'Los buzos de Godden y Baddeley recordaban mejor…',o:['Bajo el agua siempre','En el mismo lugar donde aprendieron','En tierra siempre','Con música'],c:1,h:'El contexto es una llave.',e:'Memoria dependiente del contexto.'},
+{p:'¿Qué técnica tiene más respaldo para recordar a largo plazo?',o:['Releer','Subrayar','Recuperar de memoria en repasos espaciados','Escuchar música'],c:2,h:'Sacar, no meter.',e:'Efecto de prueba + espaciado.'},
+{p:'¿Quién inventó el sistema de cajas para tarjetas de repaso?',o:['Ebbinghaus','Sebastian Leitner','Einstein','Kirkpatrick'],c:1,h:'Un periodista alemán, en 1972.',e:'El sistema Leitner.'},
+{p:'¿Qué es el efecto de hipercorrección?',o:['Corregir demasiado','Los errores cometidos con mucha seguridad se corrigen mejor','Los expertos no se equivocan','Corregir daña la memoria'],c:1,h:'Estaba seguro… y se equivocó.',e:'La sorpresa refuerza la corrección.'},
+{p:'Decir algo en voz alta en vez de leerlo en silencio…',o:['No cambia nada','Ayuda a recordarlo (efecto de producción)','Lo hace olvidar','Solo sirve a niños'],c:1,h:'MacLeod, 2010.',e:'Efecto de producción.'},
+{p:'En el estudio de Standing (1973), ¿cuántas fotos vieron los voluntarios?',o:['100','1 000','10 000','1 millón'],c:2,h:'Muchísimas.',e:'Y reconocieron más del 80%.'},
+{p:'¿Cuáles son los 4 pilares del aprendizaje de Dehaene?',o:['Leer, escribir, escuchar, hablar','Atención, compromiso activo, retroalimentación del error, consolidación','Visual, auditivo, kinestésico, lector','Ver, oír, tocar, oler'],c:1,h:'El primero es la atención.',e:'Si falta uno, el aprendizaje cojea.'},
+{p:'Los estilos de aprendizaje (visual, auditivo, kinestésico)…',o:['Están comprobados','Son preferencias, pero enseñar según ellos no mejora el aprendizaje','Solo aplican a adultos','Son genéticos'],c:1,h:'Pashler, 2008.',e:'Es uno de los neuromitos más extendidos.'},
+{p:'¿De dónde salen los porcentajes de la pirámide del aprendizaje?',o:['De Harvard','De la NASA','De ningún estudio','De Edgar Dale'],c:2,h:'Números demasiado redondos.',e:'Se atribuyen por error a Dale, que no usó porcentajes.'},
+{p:'¿A qué se aplica realmente la regla 7-38-55 de Mehrabian?',o:['A toda comunicación','A juzgar sentimientos cuando palabras y tono se contradicen','A las ventas','A las charlas técnicas'],c:1,h:'Mensajes incongruentes.',e:'El propio autor rechaza la generalización.'},
+{p:'¿Qué película popularizó el mito del 10% del cerebro en 2014?',o:['Inception','Lucy','Matrix','Avatar'],c:1,h:'Scarlett Johansson.',e:'Usamos prácticamente todo el cerebro.'},
+{p:'¿Cuánto recuerdan realmente los peces dorados?',o:['3 segundos','Semanas o meses','Nada','1 minuto'],c:1,h:'Mucho más que el mito.',e:'Se les entrena y conservan lo aprendido.'},
+{p:'En el experimento del gorila invisible, ¿cuántos no vieron al gorila?',o:['Nadie','Cerca de la mitad','Todos','Solo 1%'],c:1,h:'Estaban contando pases.',e:'Ceguera por falta de atención.'},
+{p:'¿Qué porcentaje de radiólogos no vio un gorila en una tomografía (Drew, 2013)?',o:['5%','33%','83%','100%'],c:2,h:'La gran mayoría.',e:'Incluso los expertos.'},
+{p:'¿Qué es el efecto cóctel?',o:['Olvidar en fiestas','Escuchar tu nombre a pesar del ruido','Hablar más fuerte','Beber y recordar'],c:1,h:'Cherry, 1953.',e:'Usa nombres en tus charlas.'},
+{p:'En el estudio de Newton (1990), ¿cuántos oyentes adivinaron las canciones tamborileadas?',o:['La mitad','3 de 120','Todos','Ninguno'],c:1,h:'Muy pocos.',e:'La maldición del conocimiento.'},
+{p:'¿Qué hace la curiosidad según Gruber (2014)?',o:['Distrae','Mejora el recuerdo incluso de cosas cercanas no relacionadas','Cansa','No tiene efecto'],c:1,h:'Ventana de aprendizaje.',e:'La curiosidad abre el cerebro a lo que pase cerca.'},
+{p:'Un mensaje de miedo produce conducta segura cuando…',o:['Es muy impactante','Viene con una acción clara y la persona se siente capaz','Se repite gritando','Usa fotos de sangre'],c:1,h:'Modelo de Witte.',e:'Amenaza + eficacia.'},
+{p:'"A mí no me va a pasar" es un ejemplo de…',o:['Optimismo irreal','Primacía','Chunking','Recencia'],c:0,h:'Weinstein, 1980.',e:'La mayoría se cree por debajo del promedio de riesgo.'},
+{p:'¿Cuánto habló Lincoln en Gettysburg?',o:['Dos horas','Unos dos minutos','Media hora','Diez minutos'],c:1,h:'Alrededor de 270 palabras.',e:'Everett habló dos horas y casi nadie lo recuerda.'},
+{p:'Según la regla del pico y el final, una experiencia se recuerda por…',o:['Su duración','Su momento más intenso y su final','Su inicio','Su costo'],c:1,h:'Kahneman y Redelmeier.',e:'Diseña el pico y el cierre de tu charla.'},
+{p:'¿Cuánto esperaban los profesores tras preguntar, según Mary Budd Rowe?',o:['Cerca de 1 segundo','10 segundos','1 minuto','No esperaban'],c:0,h:'Muy poco.',e:'Con 3 segundos o más, mejoran las respuestas.'},
+{p:'¿Qué descubrió Goldin-Meadow sobre los gestos?',o:['Distraen','Los ciegos de nacimiento también gesticulan: los gestos ayudan a pensar','Solo los usan los latinos','Son aprendidos por imitación'],c:1,h:'Incluso hablando con otro ciego.',e:'Mover las manos ayuda al que habla.'},
+{p:'¿Qué es la ilusión de transparencia?',o:['Creer que tus nervios se notan más de lo que realmente se notan','Ver a través de vidrios','Ser honesto','Hablar claro'],c:0,h:'Savitsky y Gilovich, 2003.',e:'Se notan menos de lo que crees.'},
+{p:'¿Qué decirte antes de hablar en público, según Brooks (2014)?',o:['"Cálmate"','"Estoy emocionado / activado"','"Va a salir mal"','Nada'],c:1,h:'Reencuadre.',e:'Mejoró el desempeño frente a intentar calmarse.'},
+{p:'¿Qué técnica de García Márquez sirve para abrir una charla?',o:['Anunciar el final y dejar el suspenso en el "cómo"','Hablar dos horas','Leer las láminas','Empezar con la lista'],c:0,h:'"Crónica de una muerte anunciada".',e:'La curiosidad se muda del qué al cómo.'},
+{p:'¿Qué técnica de Jaime Bayly baja las defensas del público?',o:['Gritar','La confesión en primera persona con humor','Citar normas','Usar siglas'],c:1,h:'Contar tus propios errores.',e:'La vulnerabilidad genera confianza.'},
+{p:'17 a 19 horas sin dormir equivalen en rendimiento a…',o:['Nada','Unos 0.05% de alcohol en sangre','Una siesta','Un café'],c:1,h:'Williamson y Feyer, 2000.',e:'Cuidado con capacitar al final de un turno nocturno.'},
+{p:'¿Qué es el efecto de la puerta (Radvansky)?',o:['Olvidar qué buscabas al cruzar una puerta','Recordar más con puertas abiertas','Miedo a las puertas','Nada'],c:0,h:'Te pasa en tu casa.',e:'El cerebro cierra el "episodio" al cruzar.'},
+{p:'¿Qué nivel de Kirkpatrick mide la conducta en el trabajo?',o:['1','2','3','4'],c:2,h:'Después de aprendizaje.',e:'Nivel 3: TOP, inspecciones, observación.'},
+{p:'¿Cuáles son los pasos del método TWI?',o:['Leer, firmar, archivar','Preparar, presentar, probar, seguimiento','Ver, oír, hacer','Planear, hacer, verificar, actuar'],c:1,h:'Cuatro pasos, empieza por "preparar".',e:'Nacido en 1940, adoptado por Toyota.'},
+{p:'¿Qué es el sesgo retrospectivo?',o:['Mirar atrás al hablar','Creer que algo era predecible después de conocer el resultado','Recordar el pasado mejor','Olvidar lo antiguo'],c:1,h:'Fischhoff, 1975.',e:'"Era obvio que iba a pasar".'},
+{p:'¿Cuánto bajó la mortalidad quirúrgica con la lista de verificación de la OMS (2009)?',o:['De 1.5% a 0.8%','De 50% a 10%','Nada','Subió'],c:0,h:'Casi a la mitad.',e:'Una lista no depende de la memoria bajo presión.'},
+{p:'¿Qué son los "detalles seductores" (Harp y Mayer)?',o:['Imágenes bonitas que ayudan','Datos llamativos sin relación que reducen el aprendizaje','Detalles técnicos','Láminas con animación'],c:1,h:'Interesan, pero distraen.',e:'Todo dato debe conectarse con la idea central.'},
+{p:'¿Qué dice el principio de redundancia de Mayer?',o:['Repite todo tres veces','No leas en voz alta el mismo texto de la lámina','Usa más texto','Usa más colores'],c:1,h:'Voz y texto idéntico compiten.',e:'Habla tú; la lámina, imagen.'},
+{p:'¿Qué demostró el estudio de multitarea de Stanford (2009)?',o:['Los multitarea filtran mejor','Los que más hacen multitarea filtran peor las distracciones','No hay diferencia','La multitarea mejora la memoria'],c:1,h:'Lo contrario de lo que creían.',e:'Ophir, Nass y Wagner.'}
+];
+
+/* ===== MODO 3: AVENTURA "VIAJE NEURONAL" ===== */
+const ZONAS=[
+{id:'talamo',n:'Tálamo',sub:'La puerta de entrada',i:'🚪',tok:'Llave del tálamo',intro:'Llegas a una aduana gigantesca. Por aquí entra casi todo lo que ves, oyes y tocas. El guardia filtra sin piedad: lo que no parece importante, no pasa.',
+retos:[
+{t:'mc',p:'¿Qué sentido llega más directo a la amígdala y al hipocampo, saltándose en gran parte al tálamo?',o:['La vista','El oído','El olfato','El tacto'],c:2,e:'Por eso un olor despierta recuerdos de golpe.'},
+{t:'vf',p:'Si tu público está concentrado en el celular, puede no ver algo evidente que pasa frente a él.',c:true,e:'Ceguera por falta de atención (el gorila invisible).'},
+{t:'match',p:'Une cada estímulo con su efecto en la atención:',pairs:[['Tu propio nombre','Atraviesa el filtro'],['Ruido de motor','Roba memoria de trabajo'],['Objeto inesperado','Abre la curiosidad']],e:'El filtro deja pasar lo relevante y lo sorprendente.'}]},
+{id:'prefrontal',n:'Corteza prefrontal',sub:'La mesa de trabajo',i:'🧮',tok:'Ficha prefrontal',intro:'Una mesa pequeña, iluminada, donde el jefe de turno sostiene lo que piensas ahora. Si apilas demasiado, las cosas se caen al piso.',
+retos:[
+{t:'mc',p:'¿Cuántas unidades sostiene la mesa a la vez, aproximadamente?',o:['1','4','10','20'],c:1,e:'Alrededor de 4. Agrupa.'},
+{t:'orden',p:'Ordena de mayor a menor carga para la mesa del oyente:',items:['Diez normas leídas sin pausa','Cinco normas con siglas','Tres ideas con ejemplo','Una conducta en una frase'],e:'Menos y más concreto = más espacio para entender.'},
+{t:'vf',p:'El estrés intenso mejora el trabajo de la corteza prefrontal.',c:false,e:'El cortisol alto la bloquea.'}]},
+{id:'amigdala',n:'Amígdala',sub:'El detector de alarmas',i:'🚨',tok:'Almendra de alarma',intro:'Una almendra roja que vibra. Marca lo emocional como importante. Si se asusta demasiado, toma el control y apaga la mesa de trabajo.',
+retos:[
+{t:'mc',p:'¿Qué mensaje de miedo funciona?',o:['Foto sangrienta sin explicación','Amenaza + acción clara + "tú puedes hacerlo"','Gritar','Amenazar con sanciones'],c:1,e:'Sin eficacia, el miedo produce negación.'},
+{t:'match',p:'Une cada situación con su efecto:',pairs:[['Emoción moderada','Graba mejor'],['Miedo intenso','Bloquea el razonamiento'],['Burla en público','Oculta los errores']],e:'La dosis emocional importa.'},
+{t:'vf',p:'Contar un incidente con burla hacia el involucrado mejora la seguridad psicológica.',c:false,e:'La destruye.'}]},
+{id:'hipocampo',n:'Hipocampo',sub:'El archivador',i:'🗄️',tok:'Caballito de mar',intro:'Un caballito de mar archivista que corre entre estantes. Registra lo nuevo y, de noche, lo lleva a la bodega de la corteza.',
+retos:[
+{t:'orden',p:'Ordena las etapas de un recuerdo:',items:['Atención','Memoria de trabajo','Codificación','Consolidación','Recuperación'],e:'Si falla una, el recuerdo no llega.'},
+{t:'mc',p:'¿Qué le pasó a Henry Molaison sin hipocampos?',o:['No podía moverse','No formaba recuerdos nuevos de hechos, pero aprendía habilidades','Perdió todos sus recuerdos de infancia','Nada'],c:1,e:'La memoria procedimental siguió funcionando.'},
+{t:'match',p:'Une cada tipo de memoria con su ejemplo:',pairs:[['Episódica','El día que giró la tubería'],['Semántica','La eslinga carga 2 t'],['Procedimental','Ponerse el arnés']],e:'Las habilidades se aprenden haciendo.'}]},
+{id:'dopamina',n:'Sistema de recompensa',sub:'El motor de la curiosidad',i:'⚡',tok:'Chispa de dopamina',intro:'Una central eléctrica que se enciende con lo inesperado. No premia el premio: premia la sorpresa y la anticipación.',
+retos:[
+{t:'mc',p:'¿Cuándo se dispara la dopamina en un mono que ya aprendió que la luz anuncia jugo?',o:['Al recibir el jugo','Al ver la luz, antes del jugo','Nunca','Al dormir'],c:1,e:'Anticipación y sorpresa (Schultz).'},
+{t:'mc',p:'¿Cuál abre mejor el hueco de curiosidad al iniciar una charla?',o:['"Hoy hablaremos de izaje"','"¿Cuánto pesa la carga que levantamos ayer?"','"Firmen la lista"','"Esto es obligatorio"'],c:1,e:'Pregunta real con respuesta desconocida.'},
+{t:'vf',p:'Anunciar al inicio que al final mostrarás algo mantiene la atención durante la charla.',c:true,e:'La anticipación activa el sistema de recompensa.'}]},
+{id:'cerebelo',n:'Cerebelo y ganglios basales',sub:'La fábrica de hábitos',i:'⚙️',tok:'Engranaje del hábito',intro:'Una fábrica ruidosa donde las acciones repetidas se convierten en rutinas automáticas. Aquí no entran palabras: entra práctica.',
+retos:[
+{t:'orden',p:'Ordena los pasos del método TWI:',items:['Preparar al trabajador','Presentar la operación','Probar: que lo haga él','Seguimiento en el trabajo'],e:'Así se enseñan habilidades desde 1940.'},
+{t:'vf',p:'Una charla de 5 minutos basta para que una conducta se vuelva automática.',c:false,e:'Los hábitos se forman con práctica repetida.'},
+{t:'mc',p:'Practicar mezclando eslingas, grilletes y ganchos se llama:',o:['Bloque','Intercalado','Chunking','Recencia'],c:1,e:'Enseña a distinguir qué aplicar.'}]},
+{id:'sueno',n:'El turno de noche',sub:'La consolidación',i:'🌙',tok:'Luna consolidada',intro:'De noche, el cerebro no descansa: repasa. Las secuencias del día vuelven a sonar mientras roncas.',
+retos:[
+{t:'mc',p:'¿Qué rinde más?',o:['10 repasos en una noche','4 repasos espaciados en un mes','Releer el día del examen','No repasar'],c:1,e:'El espaciado vence a la curva del olvido.'},
+{t:'match',p:'Une cada repaso con su día recomendado:',pairs:[['Primer repaso','Al día siguiente'],['Segundo','A los 3 días'],['Tercero','A la semana']],e:'Luego, al mes.'},
+{t:'vf',p:'17 a 19 horas sin dormir afectan el rendimiento como unos 0.05% de alcohol en sangre.',c:true,e:'Williamson y Feyer, 2000.'}]},
+{id:'auditorio',n:'El auditorio',sub:'Jefe final: tu charla',i:'🎤',tok:'Micrófono de oro',jefe:true,intro:'Todo lo que recogiste te trajo aquí. Veinte personas a las 6:30 a.m. y un motor de fondo. Demuestra que sabes comunicar para que se quede.',
+retos:[
+{t:'orden',p:'Ordena la estructura de una charla efectiva:',items:['Gancho','Mensaje central','Máximo 3 ideas','Prueba','Verificación','Acción y cierre'],e:'La estructura que el cerebro sigue.'},
+{t:'mc',p:'¿Cuál es un mensaje central correcto?',o:['"La seguridad es lo primero"','"Nadie se para debajo de una carga suspendida"','"Hablaremos de izaje"','"Cumplan el procedimiento"'],c:1,e:'Una conducta, menos de 15 palabras.'},
+{t:'match',p:'Une cada técnica con su autor o estudio:',pairs:[['Final anunciado','García Márquez'],['Confesión con humor','Jaime Bayly'],['Pico y final','Kahneman'],['Tiempo de espera','Mary Budd Rowe']],e:'Técnicas de novelista y de laboratorio.'},
+{t:'vf',p:'Leer en voz alta el texto de la lámina mejora la retención.',c:false,e:'Principio de redundancia.'},
+{t:'mc',p:'¿Qué evidencia prueba mejor que la charla funcionó?',o:['La lista firmada','Ver días después la conducta aplicada en campo','La encuesta de satisfacción','La duración'],c:1,e:'Nivel 3 de Kirkpatrick.'}]}
+];
+
+/* ===== MODO 4: CARTAS "DUELO DE TÉCNICAS" ===== */
+const TECNICAS={
+historia:{n:'Historia real',i:'📖',d:'Persona, lugar, giro, consecuencia, lección.'},
+pregunta:{n:'Pregunta abierta',i:'❓',d:'"¿Qué podría salir mal aquí?" y esperas 5 s.'},
+demo:{n:'Demostración',i:'🛠️',d:'Lo haces frente a ellos, paso a paso.'},
+teachback:{n:'Teach-back',i:'🔁',d:'Que lo expliquen con sus palabras.'},
+pausa:{n:'Pausa estratégica',i:'⏸️',d:'2-3 segundos de silencio tras lo clave.'},
+dato:{n:'Dato con contexto',i:'📊',d:'"4 toneladas, dos camionetas".'},
+analogia:{n:'Analogía',i:'🔗',d:'"Es como una trocha en la selva…"'},
+unaidea:{n:'Una sola idea',i:'🎯',d:'Una conducta, menos de 15 palabras.'},
+objeto:{n:'Objeto real',i:'🧰',d:'El grillete deformado en la mano.'},
+repaso:{n:'Repaso espaciado',i:'🗓️',d:'Retomas el tema en días siguientes.'},
+practica:{n:'Práctica guiada',i:'🤝',d:'Lo hacen ellos y corriges en el momento.'},
+compromiso:{n:'Compromiso',i:'✋',d:'"¿Qué harás distinto hoy?"'},
+confesion:{n:'Confesión',i:'🙋',d:'"Yo también lo hice una vez…"'},
+nombre:{n:'Usar nombres',i:'🏷️',d:'"Jhon, imagina que tú…"'},
+lectura:{n:'Leer el procedimiento',i:'📄',d:'Todo el documento, en voz alta.'},
+miedo:{n:'Foto impactante sola',i:'😱',d:'Sangre sin explicar qué hacer.'},
+jerga:{n:'Siglas y jerga',i:'🧪',d:'"Su ATS según IPERC y PETAR…"'},
+gritar:{n:'Regañar',i:'📢',d:'Subir la voz y culpar.'}
+};
+const MALAS=['lectura','miedo','jerga','gritar'];
+const SITUACIONES=[
+{t:'Final del turno noche',d:'El personal está agotado. Tienes 5 minutos.',b:['unaidea','compromiso','pregunta','nombre'],m:['lectura','jerga','gritar'],w:'Cerebro fatigado: una sola idea, corto y participativo.'},
+{t:'Primer día de 4 nuevos',d:'Llegan nerviosos y saturados.',b:['unaidea','objeto','teachback','repaso','practica'],m:['lectura','jerga','miedo'],w:'Lo vital primero, verificado; el resto, espaciado.'},
+{t:'Muelle con motores',d:'Ruido constante; casi no se oye.',b:['demo','objeto','pausa','unaidea','nombre'],m:['lectura','jerga','historia'],w:'Canal visual y pausas cuando el auditivo falla.'},
+{t:'Capacitación de izaje',d:'Deben aprender una habilidad.',b:['demo','practica','teachback','objeto'],m:['lectura','miedo'],w:'La memoria procedimental se forma haciendo.'},
+{t:'Lección de un incidente',d:'Pasó ayer. El grupo está tenso.',b:['historia','pregunta','compromiso','confesion','dato'],m:['gritar','miedo'],w:'Narrativa sin culpa, pregunta y conducta.'},
+{t:'Veteranos que "ya saben todo"',d:'Brazos cruzados y miradas de "otra vez".',b:['pregunta','confesion','dato','historia','teachback'],m:['gritar','lectura','jerga'],w:'Ancla en su experiencia; sorpréndelos.'},
+{t:'Audiencia con celulares',d:'La mitad mira la pantalla.',b:['pregunta','pausa','objeto','nombre','confesion'],m:['gritar','lectura'],w:'Reinicia la atención con algo directo.'},
+{t:'Cambio de procedimiento',d:'Mañana se hace distinto.',b:['analogia','demo','dato','repaso','unaidea'],m:['jerga','lectura'],w:'Conecta lo nuevo con lo de antes y repásalo.'},
+{t:'Golpe de calor bajo el sol',d:'Mediodía, 34 °C, sin sombra.',b:['unaidea','dato','objeto','compromiso'],m:['lectura','jerga'],w:'Corto, concreto, y en la sombra si puedes.'},
+{t:'Inducción a visitas',d:'No conocen la operación.',b:['analogia','unaidea','objeto','dato'],m:['jerga','miedo'],w:'Lenguaje cotidiano, sin siglas.'},
+{t:'Simulacro de emergencia',d:'Deben saber qué hacer sin pensar.',b:['practica','teachback','repaso','demo'],m:['lectura'],w:'Lo automático se entrena repitiendo la acción.'},
+{t:'Campaña con muchos mensajes',d:'Te piden "meter todo" en una charla.',b:['unaidea','repaso','historia','compromiso'],m:['lectura','jerga'],w:'Una charla, una conducta; el resto en la serie.'}
+];
+const COMBOS=[['historia','pregunta'],['demo','teachback'],['demo','practica'],['dato','analogia'],['pausa','pregunta'],['objeto','demo'],['unaidea','compromiso'],['historia','compromiso'],['practica','teachback'],['confesion','historia'],['nombre','pregunta'],['objeto','historia']];
+
+/* ===== LOGROS ===== */
+const LOGROS=[
+{id:'debut',i:'🎬',n:'Debut',d:'Termina tu primera charla en el simulador.'},
+{id:'tres',i:'⭐',n:'Tres estrellas',d:'Consigue 3 estrellas en un escenario.'},
+{id:'todos',i:'🏟️',n:'Gira completa',d:'Termina los 4 escenarios.'},
+{id:'perfecta',i:'💯',n:'Ronda perfecta',d:'Responde 10 de 10 en el concurso.'},
+{id:'sincomodin',i:'🧠',n:'Sin ayuda',d:'Gana el concurso sin usar comodines.'},
+{id:'zona',i:'🗝️',n:'Explorador',d:'Supera tu primera zona de la aventura.'},
+{id:'aventura',i:'🏆',n:'Micrófono de oro',d:'Vence al jefe final del auditorio.'},
+{id:'combo3',i:'🃏',n:'Maestro de combos',d:'Logra 3 combos en una partida de cartas.'},
+{id:'cartas',i:'♠️',n:'Gran duelista',d:'Supera 60 puntos en el duelo de técnicas.'},
+{id:'cuatro',i:'🧩',n:'Todoterreno',d:'Juega los 4 modos.'},
+{id:'xp1000',i:'🚀',n:'Mil neuronas',d:'Acumula 1000 XP.'},
+{id:'racha',i:'🔥',n:'Racha de 5',d:'5 respuestas seguidas correctas en el concurso.'}
+];
+const NIVELES=['Oyente','Aprendiz','Expositor','Facilitador','Comunicador','Instructor','Maestro','Neurocomunicador'];
+
+'use strict';
+/* ========== Utilidades ========== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const view=()=>$('#view');
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+let timerId=null;const stopTimer=()=>{if(timerId){clearInterval(timerId);timerId=null}};
+
+/* ========== Persistencia (IndexedDB, patrón repositorio) ========== */
+const DB={db:null,ok:false,open(){return new Promise(res=>{try{const r=indexedDB.open('neuroarena',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv',{keyPath:'k'});r.onsuccess=()=>{this.db=r.result;this.ok=true;res()};r.onerror=()=>res()}catch(e){res()}})}};
+const Repo={mem:new Map(),
+  get(k){if(!DB.ok)return Promise.resolve(this.mem.get(k));return new Promise(res=>{const q=DB.db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res()})},
+  put(v){if(!DB.ok){this.mem.set(v.k,v);return Promise.resolve()}return new Promise(res=>{const q=DB.db.transaction('kv','readwrite').objectStore('kv').put(v);q.onsuccess=q.onerror=()=>res()})},
+  clear(){if(!DB.ok){this.mem.clear();return Promise.resolve()}return new Promise(res=>{const q=DB.db.transaction('kv','readwrite').objectStore('kv').clear();q.onsuccess=q.onerror=()=>res()})}};
+const P={xp:0,logros:[],modos:{},sim:{},trivia:{best:0,partidas:0},aventura:{done:[]},cartas:{best:0,partidas:0},cfg:{vib:true,snd:true}};
+const saveP=()=>Repo.put({k:'perfil',v:P});
+
+/* ========== Hápticos y sonido ========== */
+const vib=ms=>{if(P.cfg.vib&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}};
+document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.opt,.tcard,label'))vib(8)},{passive:true});
+document.addEventListener('input',e=>{if(e.target.matches('input'))vib(4)});
+let AC=null;
+function tone(seq){if(!P.cfg.snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();let t=AC.currentTime;seq.forEach(([f,d,type='sine'])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d);t+=d*.8})}catch(e){}}
+const sOk=()=>{tone([[660,.09],[990,.14]]);vib(15)}, sBad=()=>{tone([[200,.18,'square']]);vib([30,40,30])}, sWin=()=>{tone([[523,.12],[659,.12],[784,.12],[1046,.3]]);vib([20,30,20,30,60])};
+
+/* ========== XP, niveles, logros ========== */
+const nivel=xp=>Math.floor(Math.sqrt(xp/100))+1;
+const xpNivel=n=>Math.pow(n-1,2)*100;
+function addXP(n,modo){
+  const antes=nivel(P.xp);P.xp+=Math.max(0,Math.round(n));P.modos[modo]=(P.modos[modo]||0)+1;
+  if(Object.keys(P.modos).length>=4)logro('cuatro');if(P.xp>=1000)logro('xp1000');
+  saveP();const d=nivel(P.xp);if(d>antes)setTimeout(()=>{sWin();toast(`¡Subiste a nivel ${d}: ${NIVELES[Math.min(d-1,NIVELES.length-1)]}!`)},600);
+}
+function logro(id){if(P.logros.includes(id))return;P.logros.push(id);saveP();const l=LOGROS.find(x=>x.id===id);if(l)setTimeout(()=>toast(`🏅 Logro: ${l.i} ${l.n}`),300)}
+function confetti(){const c=document.createElement('canvas');c.className='confetti';c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext('2d');const ps=Array.from({length:90},()=>({x:Math.random()*c.width,y:-20-Math.random()*200,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,s:4+Math.random()*5,col:['#f59e0b','#06b6d4','#22c55e','#c084fc'][Math.floor(Math.random()*4)]}));let f=0;(function an(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;x.fillStyle=p.col;x.fillRect(p.x,p.y,p.s,p.s*.6)});if(++f<140)requestAnimationFrame(an);else c.remove()})()}
+
+/* ========== Router ========== */
+function go(h){location.hash='#/'+h}
+function route(){stopTimer();const p=(location.hash.replace(/^#\/?/,'')||'inicio').split('/');window.scrollTo(0,0);
+  const V={inicio:vHome,sim:()=>p[1]?simStart(p[1]):simList(),trivia:triviaStart,aventura:()=>p[1]?zonaStart(p[1]):mapa(),cartas:cartasStart,ajustes:vAjustes};(V[p[0]]||vHome)()}
+const back=(h='inicio')=>`<button class="ib" onclick="go('${h}')">←</button>`;
+
+/* ========== Inicio ========== */
+function vHome(){
+  const n=nivel(P.xp),a=xpNivel(n),b=xpNivel(n+1),simBest=Object.values(P.sim).reduce((s,x)=>s+(x.stars||0),0);
+  view().innerHTML=`<div class="fade"><div class="card lvl"><div class="badge">${n}</div><div class="grow"><b>${NIVELES[Math.min(n-1,NIVELES.length-1)]}</b><div class="small muted mono">${P.xp} XP · faltan ${b-P.xp} para nivel ${n+1}</div><div class="bar" style="margin-top:6px"><i style="width:${(P.xp-a)/(b-a)*100}%"></i></div></div></div>
+  <div class="modes">
+  <button class="mode m1" onclick="go('sim')"><span class="mi">🎭</span><b>En escena</b><span>Da una charla y decide qué decir. El público reacciona.</span><span class="best">★ ${simBest}/12</span></button>
+  <button class="mode m2" onclick="go('trivia')"><span class="mi">⏱️</span><b>Concurso</b><span>10 preguntas contra reloj, 3 vidas y comodines.</span><span class="best">Récord ${P.trivia.best}</span></button>
+  <button class="mode m3" onclick="go('aventura')"><span class="mi">🧭</span><b>Viaje neuronal</b><span>Recorre 8 zonas del cerebro y vence al jefe final.</span><span class="best">${P.aventura.done.length}/${ZONAS.length} zonas</span></button>
+  <button class="mode m4" onclick="go('cartas')"><span class="mi">🃏</span><b>Duelo de técnicas</b><span>Combina cartas para resolver cada situación.</span><span class="best">Récord ${P.cartas.best}</span></button></div>
+  <div class="card"><h3>🏅 Logros <span class="small muted mono">${P.logros.length}/${LOGROS.length}</span></h3><div class="logros">${LOGROS.map(l=>`<div class="logro ${P.logros.includes(l.id)?'on':''}" title="${esc(l.d)}" onclick="toast('${esc(l.n)}: ${esc(l.d)}')"><i>${l.i}</i>${esc(l.n)}</div>`).join('')}</div></div>
+  <p class="small muted" style="text-align:center">Complemento de NeuroComunica. Todo lo que juegas aquí está explicado en los 7 capítulos.</p></div>`;
+}
+
+/* ========== MODO 1: EN ESCENA ========== */
+function simList(){
+  view().innerHTML=`<div class="fade"><div class="row">${back()}<h2 class="grow" style="margin:0">🎭 En escena</h2></div><p class="small muted">Elige un escenario. Tres medidores: <b class="am">atención</b>, <b class="cy">comprensión</b> y <b class="okc">retención</b>. Además, un imprevisto aparecerá en algún momento.</p>
+  ${ESCENARIOS.map(s=>{const b=P.sim[s.id];return `<button class="mod" onclick="go('sim/${s.id}')"><div class="ic">${s.icono}</div><div class="grow"><div class="t">${esc(s.titulo)}</div><div class="s">${esc(s.ctx)}</div><div class="am" style="letter-spacing:2px">${'★'.repeat(b?.stars||0)}<span class="muted">${'☆'.repeat(3-(b?.stars||0))}</span>${b?` <span class="small mono muted">${b.best} pts</span>`:''}</div></div></button>`}).join('')}</div>`;
+}
+let G=null;const RANK=shuffle([...Array(16).keys()]);
+function simStart(id){
+  const sc=ESCENARIOS.find(s=>s.id===id);if(!sc)return go('sim');
+  const pasos=[...sc.pasos];const ev=EVENTOS[Math.floor(Math.random()*EVENTOS.length)];pasos.splice(1+Math.floor(Math.random()*3),0,{...ev,evento:true});
+  G={sc,pasos,i:0,a:50,c:35,r:25,log:[]};
+  view().innerHTML=`<div class="fade card"><div class="row">${back('sim')}<span class="grow small muted">Escenario</span></div><div style="font-size:3rem;text-align:center">${sc.icono}</div><h2 style="text-align:center">${esc(sc.titulo)}</h2><p class="muted small" style="text-align:center">${esc(sc.ctx)}</p><div class="callout amber"><b>Tu objetivo:</b> ${esc(sc.obj)}</div><p class="small muted">Toma ${pasos.length} decisiones. Cada una mueve la atención, la comprensión y la retención de tu público.</p><button class="btn pri full" onclick="simStep()">Subir al escenario</button></div>`;
+}
+function faces(a){const n=Math.round(a/100*16),A=['😃','🙂','🤔','😮'],B=['😐','🥱','📱','😴'];return RANK.map((rk,i)=>`<span>${rk<n?A[i%4]:B[i%4]}</span>`).join('')}
+function meters(){return `<div class="meters">${[['Atención','a','#f59e0b'],['Comprensión','c','#06b6d4'],['Retención','r','#22c55e']].map(([n,k,col])=>`<div class="meter"><span>${n}</span><div class="bar"><i style="width:${G[k]}%;background:${col}"></i></div><b>${Math.round(G[k])}</b></div>`).join('')}</div>`}
+function simStep(){
+  const st=G.pasos[G.i],ops=shuffle(st.o.map((o,k)=>({...o,k})));
+  view().innerHTML=`<div class="fade"><div class="qhead">${back('sim')}<span class="small muted">${esc(G.sc.titulo)}</span><span class="mono am">${G.i+1}/${G.pasos.length}</span></div>${meters()}<div class="aud">${faces(G.a)}</div>
+  <div class="card"><div class="sit">${esc(st.s)}</div><div id="ops">${ops.map(o=>`<button class="opt" data-k="${o.k}">${esc(o.t)}</button>`).join('')}</div><div id="fb"></div></div></div>`;
+  $$('#ops .opt').forEach(b=>b.onclick=()=>simPick(+b.dataset.k,b));
+}
+function simPick(k,btn){
+  const st=G.pasos[G.i],o=st.o[k],best=st.o.reduce((m,x)=>Math.max(m,x.a+x.c+x.r),-999),isBest=o.a+o.c+o.r===best;
+  $$('#ops .opt').forEach(b=>{b.disabled=true;const ob=st.o[+b.dataset.k];if(ob.a+ob.c+ob.r===best)b.classList.add('ok')});if(!isBest)btn.classList.add('bad');
+  // la atención amplifica lo demás: con poca atención, la comprensión sube menos
+  const fa=G.a/100;G.a=clamp(G.a+o.a);G.c=clamp(G.c+(o.c>0?o.c*(0.5+fa*0.7):o.c));G.r=clamp(G.r+(o.r>0?o.r*(0.5+fa*0.7):o.r));
+  G.log.push({s:st.s,t:o.t,f:o.f,best:isBest,ev:!!st.evento});
+  isBest?sOk():sBad();
+  const d=(v,n)=>v?`<span class="${v>0?'up':'dn'}">${v>0?'+':''}${v} ${n}</span>`:'';
+  $('.meters').outerHTML=meters();$('.aud').innerHTML=faces(G.a);
+  const last=G.i===G.pasos.length-1;
+  $('#fb').innerHTML=`<div class="fb ${isBest?'ok':'bad'}"><b>${isBest?'¡Buena decisión!':'Hay una opción mejor.'}</b> ${esc(o.f)}<div class="delta">${d(o.a,'atención')}${d(o.c,'comprensión')}${d(o.r,'retención')}</div></div><button class="btn pri full" id="nx">${last?'Ver resultado':'Continuar →'}</button>`;
+  $('#nx').onclick=()=>{if(last)simEnd();else{G.i++;simStep()}};$('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function simEnd(){
+  const sc=Math.round(G.a*.3+G.c*.35+G.r*.35),stars=sc>=80?3:sc>=60?2:sc>=40?1:0,id=G.sc.id;
+  const prev=P.sim[id]||{best:0,stars:0};P.sim[id]={best:Math.max(prev.best,sc),stars:Math.max(prev.stars,stars),n:(prev.n||0)+1};
+  logro('debut');if(stars===3)logro('tres');if(ESCENARIOS.every(s=>P.sim[s.id]))logro('todos');
+  addXP(sc,'sim');if(stars>=2){sWin();confetti()}
+  const msg=stars===3?'Tu público se fue con el mensaje en la cabeza. Así se ve una charla que se queda.':stars===2?'Buena charla. Revisa las decisiones marcadas y apunta a las 3 estrellas.':stars===1?'El mensaje llegó a medias. Mira qué decisiones restaron atención al inicio.':'Como la primera charla de Rosa: nadie recordará nada. Vuelve a intentarlo con lo que aprendiste.';
+  view().innerHTML=`<div class="fade"><div class="card" style="text-align:center"><div class="small muted">${esc(G.sc.titulo)}</div><div class="stars am">${'★'.repeat(stars)}<span class="muted">${'☆'.repeat(3-stars)}</span></div><div class="big-score">${sc}</div><div class="small mono muted">puntos · +${sc} XP</div>${meters()}<p class="small">${msg}</p></div>
+  <div class="card"><h3>Repaso de tus decisiones</h3>${G.log.map((l,i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="small muted">${i+1}. ${l.ev?'Imprevisto · ':''}${esc(l.s)}</div><div>${l.best?'✅':'⚠️'} ${esc(l.t)}</div><div class="small cy">${esc(l.f)}</div></div>`).join('')}</div>
+  <div class="row"><button class="btn grow" onclick="go('sim')">Escenarios</button><button class="btn pri grow" onclick="simStart('${id}')">Repetir</button></div></div>`;
+}
+
+/* ========== MODO 2: CONCURSO ========== */
+let T=null;
+function triviaStart(){
+  T={qs:shuffle(TRIVIA).slice(0,10).map(q=>({...q,ord:shuffle([0,1,2,3])})),i:0,vidas:3,pts:0,racha:0,maxr:0,ok:0,cl:{f:1,p:1,t:1},usados:0};
+  view().innerHTML=`<div class="fade card"><div class="row">${back()}<span class="grow"></span></div><div style="font-size:3rem;text-align:center">⏱️</div><h2 style="text-align:center">Concurso</h2><ul class="small"><li>10 preguntas, 20 segundos cada una.</li><li>3 vidas ❤️. Si se acaban, pierdes.</li><li>Más rápido = más puntos. Racha de aciertos = bonus.</li><li>Comodines de un solo uso: <b>50/50</b>, <b>pista</b> y <b>+10 s</b>.</li></ul><p class="small muted">Récord actual: <b class="mono am">${P.trivia.best}</b></p><button class="btn pri full" onclick="tQ()">¡Empezar!</button></div>`;
+}
+function tQ(){
+  const q=T.qs[T.i];T.t=20;T.max=20;T.lock=false;
+  view().innerHTML=`<div class="fade"><div class="qhead">${back()}<span class="hearts">${'❤️'.repeat(T.vidas)}${'🖤'.repeat(3-T.vidas)}</span><span class="mono am">${T.pts} pts</span></div>
+  <div class="row small muted"><span class="grow">Pregunta ${T.i+1}/10</span><span>${T.racha>1?`🔥 racha ${T.racha}`:''}</span><b class="mono" id="tt">20</b></div><div class="timer"><i id="tb" style="width:100%"></i></div>
+  <div class="lifelines"><button id="lf" ${T.cl.f?'':'disabled'}>✂️ 50/50</button><button id="lp" ${T.cl.p?'':'disabled'}>💡 Pista</button><button id="lt" ${T.cl.t?'':'disabled'}>⏳ +10 s</button></div>
+  <div class="card"><div class="qp">${esc(q.p)}</div><div id="hint"></div><div id="opts">${q.ord.map(i=>`<button class="opt" data-i="${i}">${esc(q.o[i])}</button>`).join('')}</div><div id="fb"></div></div></div>`;
+  $$('#opts .opt').forEach(b=>b.onclick=()=>tAns(+b.dataset.i,b));
+  $('#lf').onclick=()=>{if(T.lock)return;T.cl.f=0;T.usados++;$('#lf').disabled=true;shuffle([0,1,2,3].filter(i=>i!==q.c)).slice(0,2).forEach(i=>{const b=$(`#opts .opt[data-i="${i}"]`);b.disabled=true;b.style.opacity=.25})};
+  $('#lp').onclick=()=>{if(T.lock)return;T.cl.p=0;T.usados++;$('#lp').disabled=true;$('#hint').innerHTML=`<div class="callout cyan small">💡 ${esc(q.h)}</div>`};
+  $('#lt').onclick=()=>{if(T.lock)return;T.cl.t=0;T.usados++;$('#lt').disabled=true;T.t+=10;T.max+=10};
+  timerId=setInterval(()=>{T.t-=.25;const tb=$('#tb'),tt=$('#tt');if(!tb){stopTimer();return}tb.style.width=Math.max(0,T.t/T.max*100)+'%';tt.textContent=Math.ceil(Math.max(0,T.t));if(T.t<=5&&Math.abs(T.t%1)<.01)tone([[880,.05]]);if(T.t<=0)tAns(-1,null)},250);
+}
+function tAns(i,btn){
+  if(T.lock)return;T.lock=true;stopTimer();const q=T.qs[T.i],ok=i===q.c;
+  $$('#opts .opt').forEach(b=>{b.disabled=true;if(+b.dataset.i===q.c)b.classList.add('ok')});if(btn&&!ok)btn.classList.add('bad');
+  let gan=0;if(ok){T.ok++;T.racha++;T.maxr=Math.max(T.maxr,T.racha);gan=100+Math.round(T.t*5)+(T.racha>=3?50*(T.racha-2):0);T.pts+=gan;sOk();if(T.racha>=5)logro('racha')}else{T.racha=0;T.vidas--;sBad()}
+  const fin=T.vidas===0||T.i===9;
+  $('#fb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?`¡Correcto! +${gan}`:i===-1?'¡Se acabó el tiempo!':'Incorrecto.'}</b> ${esc(q.e)}</div><button class="btn pri full" id="nx">${fin?'Ver resultado':'Siguiente →'}</button>`;
+  $('#nx').onclick=()=>{if(fin)tEnd();else{T.i++;tQ()}};$('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function tEnd(){
+  const gano=T.vidas>0,rec=T.pts>P.trivia.best;P.trivia.best=Math.max(P.trivia.best,T.pts);P.trivia.partidas++;
+  if(T.ok===10)logro('perfecta');if(gano&&T.usados===0)logro('sincomodin');
+  addXP(T.pts/10,'trivia');if(gano){sWin();confetti()}
+  view().innerHTML=`<div class="fade card" style="text-align:center"><div style="font-size:3rem">${gano?'🏆':'💀'}</div><h2>${gano?'¡Ganaste!':'Sin vidas'}</h2><div class="big-score">${T.pts}</div><div class="mono small muted">${T.ok}/10 correctas · racha máx. ${T.maxr} · +${Math.round(T.pts/10)} XP</div>${rec?'<p class="am"><b>🎉 ¡Nuevo récord!</b></p>':`<p class="small muted">Récord: ${P.trivia.best}</p>`}
+  <p class="small">${T.ok>=8?'Dominas el material. Prueba el jefe final del Viaje neuronal.':T.ok>=5?'Bien. Los errores con explicación se graban mejor que los aciertos con suerte.':'Repasa los capítulos en NeuroComunica y vuelve: el efecto de prueba hará el resto.'}</p>
+  <div class="row"><button class="btn grow" onclick="go('inicio')">Inicio</button><button class="btn pri grow" onclick="triviaStart()">Otra ronda</button></div></div>`;
+}
+
+/* ========== MODO 3: VIAJE NEURONAL ========== */
+function mapa(){
+  const done=P.aventura.done;
+  view().innerHTML=`<div class="fade"><div class="row">${back()}<h2 class="grow" style="margin:0">🧭 Viaje neuronal</h2></div><p class="small muted">Recorre el cerebro de la puerta de entrada al auditorio. Cada zona tiene retos; tienes 3 vidas por zona. Gana su ficha para abrir la siguiente.</p>
+  <div class="map">${ZONAS.map((z,i)=>{const d=done.includes(z.id),open=!d&&(i===0||done.includes(ZONAS[i-1].id)),lock=!d&&!open;
+  return `${i?`<div class="zline ${d||open?'on':''}"></div>`:''}<button class="znode ${d?'done':open?'open':'lock'} ${z.jefe?'jefe':''}" ${lock?'disabled':''} onclick="go('aventura/${z.id}')"><div class="zi">${lock?'🔒':z.i}</div><div class="grow"><div class="t"><b>${esc(z.n)}</b></div><div class="small muted">${esc(z.sub)}${z.jefe?' · JEFE FINAL':''}</div>${d?`<div class="small okc">✓ ${esc(z.tok)}</div>`:''}</div></button>`}).join('')}</div>
+  ${done.length?`<p class="small muted" style="text-align:center">Fichas: ${ZONAS.filter(z=>done.includes(z.id)).map(z=>z.i).join(' ')}</p>`:''}</div>`;
+}
+let Z=null;
+function zonaStart(id){
+  const i=ZONAS.findIndex(z=>z.id===id),z=ZONAS[i];if(!z)return go('aventura');
+  if(i>0&&!P.aventura.done.includes(ZONAS[i-1].id)&&!P.aventura.done.includes(id))return go('aventura');
+  Z={z,i:0,vidas:3,err:0};
+  view().innerHTML=`<div class="fade card"><div class="row">${back('aventura')}<span class="grow small muted">${z.jefe?'Jefe final':'Zona '+(i+1)}</span></div><div style="font-size:3.5rem;text-align:center">${z.i}</div><h2 style="text-align:center;margin-bottom:0">${esc(z.n)}</h2><p class="cy" style="text-align:center;margin-top:2px">${esc(z.sub)}</p><p class="sit">${esc(z.intro)}</p><p class="small muted">${z.retos.length} retos · 3 vidas · premio: ${esc(z.tok)}</p><button class="btn pri full" onclick="zReto()">Entrar</button></div>`;
+}
+function zReto(){
+  const r=Z.z.retos[Z.i];Z.fallo=false;
+  let body='';
+  if(r.t==='mc'){Z.ord=shuffle(r.o.map((_,i)=>i));body=Z.ord.map(i=>`<button class="opt" data-i="${i}">${esc(r.o[i])}</button>`).join('')}
+  else if(r.t==='vf')body=`<button class="opt" data-v="1">✅ Verdadero</button><button class="opt" data-v="0">❌ Falso</button>`;
+  else if(r.t==='orden'){Z.mix=shuffle(r.items.map((_,i)=>i));Z.sel=[];body=`<p class="small muted">Tócalos en orden.</p><div class="ordlist">${Z.mix.map(i=>`<button class="opt" data-k="${i}"><span class="n"></span>${esc(r.items[i])}</button>`).join('')}</div><div class="row"><button class="btn grow" id="oR">Reiniciar</button><button class="btn pri grow" id="oC" disabled>Comprobar</button></div>`}
+  else{Z.right=shuffle(r.pairs.map((_,i)=>i));Z.left=null;Z.hechos=0;body=`<p class="small muted">Toca un elemento de la izquierda y luego su pareja.</p><div class="match"><div class="col">${r.pairs.map((p,i)=>`<button data-l="${i}">${esc(p[0])}</button>`).join('')}</div><div class="col">${Z.right.map(i=>`<button data-r="${i}">${esc(r.pairs[i][1])}</button>`).join('')}</div></div>`}
+  view().innerHTML=`<div class="fade"><div class="qhead">${back('aventura')}<span class="small muted">${Z.z.i} ${esc(Z.z.n)}</span><span class="hearts">${'❤️'.repeat(Z.vidas)}${'🖤'.repeat(3-Z.vidas)}</span></div><div class="bar"><i style="width:${Z.i/Z.z.retos.length*100}%"></i></div>
+  <div class="card" style="margin-top:12px"><div class="small cy">Reto ${Z.i+1}/${Z.z.retos.length}</div><div class="qp">${esc(r.p)}</div><div id="opts">${body}</div><div id="fb"></div></div></div>`;
+  if(r.t==='mc')$$('#opts .opt').forEach(b=>b.onclick=()=>zRes(+b.dataset.i===r.c,b));
+  else if(r.t==='vf')$$('#opts .opt').forEach(b=>b.onclick=()=>zRes((b.dataset.v==='1')===r.c,b));
+  else if(r.t==='orden'){const bs=$$('.ordlist .opt');bs.forEach(b=>b.onclick=()=>{if(b.classList.contains('sel'))return;Z.sel.push(+b.dataset.k);b.classList.add('sel');$('.n',b).textContent=Z.sel.length;$('#oC').disabled=Z.sel.length<r.items.length});
+    $('#oR').onclick=()=>{Z.sel=[];bs.forEach(b=>{b.classList.remove('sel');$('.n',b).textContent=''});$('#oC').disabled=true};
+    $('#oC').onclick=()=>{const ok=Z.sel.every((k,i)=>k===i);bs.forEach(b=>{const k=+b.dataset.k;b.classList.add(Z.sel.indexOf(k)===k?'ok':'bad')});$('#oR').remove();$('#oC').remove();zRes(ok,null,'Orden: '+r.items.join(' → '))}}
+  else{$$('.match [data-l]').forEach(b=>b.onclick=()=>{if(b.classList.contains('ok'))return;$$('.match [data-l]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');Z.left=+b.dataset.l});
+    $$('.match [data-r]').forEach(b=>b.onclick=()=>{if(Z.left==null||b.classList.contains('ok'))return;const L=$(`.match [data-l="${Z.left}"]`);
+      if(+b.dataset.r===Z.left){L.classList.remove('sel');L.classList.add('ok');b.classList.add('ok');Z.hechos++;tone([[700,.06]]);Z.left=null;if(Z.hechos===r.pairs.length)zRes(!Z.fallo,null)}
+      else{Z.fallo=true;b.classList.add('shake');L.classList.add('shake');sBad();setTimeout(()=>{b.classList.remove('shake');L.classList.remove('shake')},400)}})}
+}
+function zRes(ok,btn,extra){
+  const r=Z.z.retos[Z.i];
+  $$('#opts .opt').forEach(b=>{b.disabled=true;if(r.t==='mc'&&+b.dataset.i===r.c)b.classList.add('ok');if(r.t==='vf'&&(b.dataset.v==='1')===r.c)b.classList.add('ok')});if(btn&&!ok)btn.classList.add('bad');
+  if(ok)sOk();else{Z.vidas--;if(r.t!=='match')sBad()}
+  $('.hearts').innerHTML='❤️'.repeat(Z.vidas)+'🖤'.repeat(3-Z.vidas);
+  const muerto=Z.vidas<=0,last=Z.i===Z.z.retos.length-1;
+  $('#fb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'¡Superado!':r.t==='match'?'Lo lograste, pero con errores: −1 vida.':'Fallaste: −1 vida.'}</b> ${esc(r.e)}${extra&&!ok?`<div class="small" style="margin-top:4px">${esc(extra)}</div>`:''}</div><button class="btn pri full" id="nx">${muerto?'Reintentar zona':last?'Reclamar ficha':'Siguiente reto →'}</button>`;
+  $('#nx').onclick=()=>{if(muerto)zonaStart(Z.z.id);else if(last)zWin();else{Z.i++;zReto()}};$('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function zWin(){
+  const z=Z.z,nueva=!P.aventura.done.includes(z.id);if(nueva)P.aventura.done.push(z.id);
+  logro('zona');if(z.jefe)logro('aventura');
+  addXP(nueva?(z.jefe?200:60)+Z.vidas*10:15,'aventura');sWin();confetti();
+  const sig=ZONAS[ZONAS.indexOf(z)+1];
+  view().innerHTML=`<div class="fade card" style="text-align:center"><div style="font-size:4rem">${z.i}</div><h2>${z.jefe?'¡Venciste al auditorio!':'¡Zona superada!'}</h2><p>Ganaste: <b class="am">${esc(z.tok)}</b></p><p class="small muted">Vidas restantes: ${'❤️'.repeat(Z.vidas)} · ${nueva?'+'+((z.jefe?200:60)+Z.vidas*10):'+15'} XP</p>
+  ${z.jefe?'<p class="small">Recorriste el camino completo de un mensaje: entra por el tálamo, pasa por la mesa de trabajo, se marca con emoción, se archiva, se consolida de noche y se convierte en conducta. Ahora ve a dar una charla real.</p>':''}
+  <div class="row"><button class="btn grow" onclick="go('aventura')">Mapa</button>${sig?`<button class="btn pri grow" onclick="go('aventura/${sig.id}')">${sig.i} ${esc(sig.n)} →</button>`:''}</div></div>`;
+}
+
+/* ========== MODO 4: DUELO DE TÉCNICAS ========== */
+let C=null;
+function robar(){const i=C.mazo.findIndex(k=>!C.mano.includes(k));if(i<0)return C.mazo.length?C.mazo.pop():null;return C.mazo.splice(i,1)[0]}
+function cartasStart(){
+  const mazo=shuffle([...Object.keys(TECNICAS),...Object.keys(TECNICAS).filter(k=>!MALAS.includes(k))]);
+  C={mazo,mano:[],sits:shuffle(SITUACIONES).slice(0,8),ronda:0,pts:0,combos:0,sel:[],mull:1,log:[]};
+  for(let i=0;i<5;i++)C.mano.push(robar());
+  view().innerHTML=`<div class="fade card"><div class="row">${back()}<span class="grow"></span></div><div style="font-size:3rem;text-align:center">🃏</div><h2 style="text-align:center">Duelo de técnicas</h2><ul class="small"><li>8 rondas. Cada ronda trae una situación de charla.</li><li>Tienes 5 cartas de técnicas. Juega <b>2</b> por ronda.</li><li>Técnica ideal: <b class="okc">+3</b>. Neutra: 0. Contraproducente: <b class="badc">−3</b>.</li><li>Algunas parejas forman <b style="color:#c084fc">combo</b> (+3 extra). Ej.: Demostración + Teach-back.</li><li>Una vez por partida puedes cambiar toda tu mano.</li></ul><p class="small muted">Ojo: en el mazo hay cartas trampa (leer el procedimiento, regañar…).</p><p class="small muted">Récord: <b class="mono am">${P.cartas.best}</b></p><button class="btn pri full" onclick="cRonda()">Repartir</button></div>`;
+}
+function cRonda(){
+  const s=C.sits[C.ronda];C.sel=[];
+  view().innerHTML=`<div class="fade"><div class="qhead">${back()}<span class="small muted">Ronda ${C.ronda+1}/8</span><span class="mono am">${C.pts} pts</span></div>
+  <div class="situ"><span class="small muted">SITUACIÓN</span><b>${esc(s.t)}</b>${esc(s.d)}</div>
+  <div class="hand">${C.mano.map((k,i)=>`<button class="tcard" data-i="${i}"><i>${TECNICAS[k].i}</i><b>${esc(TECNICAS[k].n)}</b></button>`).join('')}</div>
+  <div class="tdesc" id="td">Toca una carta para ver qué hace. Elige 2.</div>
+  <div class="row"><button class="btn grow" id="mul" ${C.mull?'':'disabled'}>🔄 Cambiar mano</button><button class="btn pri grow" id="jg" disabled>Jugar 2 cartas</button></div><div id="res"></div></div>`;
+  $$('.tcard').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,k=C.mano[i];$('#td').innerHTML=`<b class="am">${TECNICAS[k].i} ${esc(TECNICAS[k].n)}:</b> ${esc(TECNICAS[k].d)}`;
+    if(C.sel.includes(i)){C.sel=C.sel.filter(x=>x!==i);b.classList.remove('sel')}else if(C.sel.length<2){C.sel.push(i);b.classList.add('sel')}$('#jg').disabled=C.sel.length!==2});
+  $('#mul').onclick=()=>{C.mull=0;C.mazo.unshift(...C.mano);C.mazo=shuffle(C.mazo);C.mano=[];for(let i=0;i<5;i++)C.mano.push(robar());cRonda()};
+  $('#jg').onclick=cJugar;
+}
+function cVal(s,k){return s.b.includes(k)?3:(s.m.includes(k)||MALAS.includes(k))?-3:0}
+function cJugar(){
+  const s=C.sits[C.ronda],ks=C.sel.map(i=>C.mano[i]);let pts=ks.reduce((a,k)=>a+cVal(s,k),0);
+  const combo=COMBOS.some(([x,y])=>(ks[0]===x&&ks[1]===y)||(ks[0]===y&&ks[1]===x))&&ks.every(k=>cVal(s,k)>=0);
+  if(combo){pts+=3;C.combos++;if(C.combos>=3)logro('combo3')}
+  C.pts+=pts;C.log.push({s:s.t,ks,pts,combo});
+  pts>=6?sOk():pts<0?sBad():tone([[520,.08]]);
+  $$('.tcard').forEach(b=>{b.disabled=true;const i=+b.dataset.i;if(C.sel.includes(i))b.classList.add(cVal(s,C.mano[i])>0?'g':cVal(s,C.mano[i])<0?'x':'sel')});
+  const ideales=s.b.map(k=>TECNICAS[k].i+' '+TECNICAS[k].n).join(', ');
+  $('#mul').remove();$('#jg').remove();
+  $('#res').innerHTML=`${combo?'<div class="combo">⚡ ¡COMBO! +3</div>':''}<div class="fb ${pts>0?'ok':'bad'}">${ks.map(k=>{const v=cVal(s,k);return `<div>${TECNICAS[k].i} ${esc(TECNICAS[k].n)}: <b class="${v>0?'okc':v<0?'badc':''}">${v>0?'+':''}${v}</b></div>`}).join('')}<div style="margin-top:6px"><b>Total ronda: ${pts>0?'+':''}${pts}</b></div><div class="small" style="margin-top:6px">${esc(s.w)}</div><div class="small muted" style="margin-top:4px">Ideales aquí: ${esc(ideales)}</div></div><button class="btn pri full" id="nx">${C.ronda===7?'Ver resultado':'Siguiente ronda →'}</button>`;
+  $('#nx').onclick=()=>{C.mano=C.mano.filter((_,i)=>!C.sel.includes(i));while(C.mano.length<5&&C.mazo.length)C.mano.push(robar());if(C.ronda===7)cEnd();else{C.ronda++;cRonda()}};
+  $('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function cEnd(){
+  const rec=C.pts>P.cartas.best;P.cartas.best=Math.max(P.cartas.best,C.pts);P.cartas.partidas++;if(C.pts>60)logro('cartas');
+  addXP(Math.max(0,C.pts)*3,'cartas');if(C.pts>=40){sWin();confetti()}
+  view().innerHTML=`<div class="fade"><div class="card" style="text-align:center"><div style="font-size:3rem">🃏</div><h2>Fin del duelo</h2><div class="big-score">${C.pts}</div><div class="mono small muted">de 72 posibles · ${C.combos} combos · +${Math.max(0,C.pts)*3} XP</div>${rec?'<p class="am"><b>🎉 ¡Nuevo récord!</b></p>':''}
+  <p class="small">${C.pts>=55?'Eliges técnicas como un facilitador experto.':C.pts>=35?'Buen criterio. Fíjate en las situaciones donde sumaste poco.':'Repasa por qué cada técnica funciona: está en los capítulos 5 y 6.'}</p></div>
+  <div class="card"><h3>Tus jugadas</h3>${C.log.map(l=>`<div class="row small" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="grow">${esc(l.s)}<br><span class="muted">${l.ks.map(k=>TECNICAS[k].i).join(' + ')}${l.combo?' ⚡':''}</span></span><b class="mono ${l.pts>0?'okc':'badc'}">${l.pts>0?'+':''}${l.pts}</b></div>`).join('')}</div>
+  <div class="row"><button class="btn grow" onclick="go('inicio')">Inicio</button><button class="btn pri grow" onclick="cartasStart()">Otra partida</button></div></div>`;
+}
+
+/* ========== Ajustes ========== */
+function vAjustes(){
+  view().innerHTML=`<div class="fade"><div class="row">${back()}<h2 class="grow" style="margin:0">⚙️ Ajustes</h2></div><div class="card">
+  <div class="sw"><span>Vibración</span><button class="tg ${P.cfg.vib?'on':''}" data-c="vib"></button></div>
+  <div class="sw"><span>Sonido</span><button class="tg ${P.cfg.snd?'on':''}" data-c="snd"></button></div>
+  <div class="sw"><span>Texto grande</span><button class="tg ${P.cfg.big?'on':''}" data-c="big"></button></div></div>
+  <div class="card"><h3>Estadísticas</h3><div class="grid2"><div class="stat"><b>${P.xp}</b><span>XP total</span></div><div class="stat"><b>${Object.values(P.modos).reduce((a,b)=>a+b,0)}</b><span>Partidas</span></div><div class="stat"><b>${P.trivia.best}</b><span>Récord concurso</span></div><div class="stat"><b>${P.cartas.best}</b><span>Récord cartas</span></div></div>
+  <button class="btn full" style="margin-top:12px;border-color:var(--bad);color:var(--bad)" id="rs">Reiniciar progreso del juego</button></div>
+  <p class="small muted" style="text-align:center">NeuroArena v1.0</p></div>`;
+  $$('.tg').forEach(b=>b.onclick=()=>{const k=b.dataset.c;P.cfg[k]=!P.cfg[k];b.classList.toggle('on',P.cfg[k]);if(k==='big')document.documentElement.classList.toggle('big',P.cfg.big);saveP()});
+  $('#rs').onclick=async()=>{if(!confirm('¿Borrar XP, logros y récords?'))return;await Repo.clear();location.hash='';location.reload()};
+}
+Object.assign(window,{go,toast,simStep,simStart,triviaStart,tQ,zReto,cRonda,cartasStart});
+
+/* ========== Arranque ========== */
+(async()=>{
+  await DB.open();const s=await Repo.get('perfil');if(s){const v=s.v;Object.assign(P,v);P.cfg={vib:true,snd:true,...v.cfg}}
+  document.documentElement.classList.toggle('big',!!P.cfg.big);
+  window.addEventListener('hashchange',route);route();
+  if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>

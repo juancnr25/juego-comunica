@@ -1,0 +1,11 @@
+CÓMO PUBLICAR EN GITHUB PAGES (desde el celular o la laptop)
+1. En github.com crea un repositorio nuevo y público llamado neuroarena.
+2. "Add file" > "Upload files": sube TODO el contenido de esta carpeta
+   (index.html, manifest.webmanifest, sw.js, .nojekyll y la carpeta icons).
+   index.html debe quedar en la raíz del repositorio, no dentro de otra carpeta.
+3. Settings > Pages > Source: "Deploy from a branch" > rama main, carpeta / (root) > Save.
+4. En 1-2 minutos estará en https://juancnr25.github.io/neuroarena/
+5. Instalar: Android (Chrome) menú ⋮ > "Agregar a pantalla principal".
+   iPhone/iPad (Safari) botón Compartir > "Agregar a inicio".
+Al actualizar: vuelve a subir los archivos. sw.js cambia de versión en cada compilación,
+así que la app se actualiza sola al abrirla con internet.
